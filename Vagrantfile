@@ -2,6 +2,8 @@ $prov_script = <<-SCRIPT
 echo I am provisioning...
 sudo apt-get update
 sudo apt-get -y install haskell-platform
+curl -sSL https://get.haskellstack.org/ | sh
+PATH="$PATH:/usr/local/bin"
 SCRIPT
 
 Vagrant.configure("2") do |config|
