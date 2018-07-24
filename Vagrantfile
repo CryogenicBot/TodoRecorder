@@ -4,6 +4,7 @@ sudo apt-get update
 sudo apt-get -y install haskell-platform
 curl -sSL https://get.haskellstack.org/ | sh
 PATH="$PATH:/usr/local/bin"
+sudo apt-get -y install postgresql postgresql-contrib
 SCRIPT
 
 Vagrant.configure("2") do |config|
