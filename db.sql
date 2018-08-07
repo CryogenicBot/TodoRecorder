@@ -26,6 +26,7 @@ CREATE UNIQUE INDEX user_id_UNIQUE ON tdrc.users (user_id ASC);
 CREATE TABLE IF NOT EXISTS tdrc.movie_records (
   movie_id SERIAL,
   timestamp TIMESTAMP NULL,
+  api_id text not null unique,
   PRIMARY KEY (movie_id));
 
 
@@ -54,6 +55,7 @@ CREATE UNIQUE INDEX exercise_id_UNIQUE ON tdrc.exercise_records (exercise_id ASC
 CREATE TABLE IF NOT EXISTS tdrc.book_records (
   book_id SERIAL,
   timestamp TIMESTAMP NULL,
+  api_id text not null unique,
   PRIMARY KEY (book_id));
 
 
@@ -66,6 +68,7 @@ CREATE UNIQUE INDEX book_id_UNIQUE ON tdrc.book_records (book_id ASC);
 CREATE TABLE IF NOT EXISTS tdrc.game_records (
   game_id SERIAL,
   timestamp TIMESTAMP NULL,
+  api_id text not null unique,
   PRIMARY KEY (game_id));
 
 

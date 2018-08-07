@@ -5,6 +5,7 @@ sudo apt-get -y install haskell-platform
 curl -sSL https://get.haskellstack.org/ | sh
 PATH="$PATH:/usr/local/bin"
 sudo apt-get -y install postgresql postgresql-contrib
+sudo apt-get -y install libpq-dev
 SCRIPT
 
 Vagrant.configure("2") do |config|
@@ -19,7 +20,7 @@ Vagrant.configure("2") do |config|
         vb.customize ["modifyvm", :id, "--uartmode1", "disconnected"]
     end 
 
-    config.vm.network "forwarded_port", guest: 1234, host: 7000
+    config.vm.network "forwarded_port", guest: 1234, host: 8000
 
     config.vm.provision "shell", inline: $prov_script  
 
