@@ -15,7 +15,7 @@ import Servant
 import UsersRoute
 import Configuration
 
-type API = UsersRoute
+type API = UsersApi
 
 startApp :: ConfigIO ()
 startApp = do 
@@ -29,7 +29,9 @@ api :: Proxy API
 api = Proxy
 
 server :: Configuration -> Server API
-server config = hoistServer api (convertApiHandler config) $ getUsers :<|> createUser
+server config = hoistServer api (convertApiHandler config) $ combinedServers
+
+combinedServers = usersServer
 
 convertApiHandler :: Configuration -> ApiHandler a -> Handler a
 convertApiHandler config = Handler . flip runReaderT config . runApiHandler

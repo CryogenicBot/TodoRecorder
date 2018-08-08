@@ -4,7 +4,11 @@
   -- set up creating records
 {-# LANGUAGE DataKinds, TypeOperators, GeneralizedNewtypeDeriving, DeriveGeneric #-}
 
-module UsersRoute where
+module UsersRoute (
+    UsersApi
+  , usersServer
+  , ApiHandler(..)
+) where
 
 import Servant
 import Control.Monad.Trans (liftIO, lift)
@@ -26,7 +30,8 @@ newtype ApiHandler a = ApiHandler {
     runApiHandler :: ReaderT Configuration (ExceptT ServantErr IO) a
 } deriving (Functor, Applicative, Monad, MonadReader Configuration, MonadError ServantErr, MonadIO)
 
-type UsersRoute = GetUsers :<|> CreateUsers
+type UsersApi = GetUsers :<|> CreateUsers
+usersServer = getUsers :<|> createUser
 
 type GetUsers = "users" :> Get '[JSON] [User]
 type CreateUsers = "users" :> ReqBody '[JSON] UserCreateRequest :> Post '[JSON] UserCreateResponse
