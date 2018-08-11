@@ -31,6 +31,7 @@ api = Proxy
 server :: Configuration -> Server API
 server config = hoistServer api (convertApiHandler config) $ combinedServers
 
+combinedServers :: ServerT API ApiHandler
 combinedServers = usersServer
 
 convertApiHandler :: Configuration -> ApiHandler a -> Handler a

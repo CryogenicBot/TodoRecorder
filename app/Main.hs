@@ -3,7 +3,7 @@
 module Main where
 
 import Data.Aeson (eitherDecodeStrict')
-import qualified Data.ByteString as ByteString
+import qualified Data.ByteString as BS
 import Control.Monad.Reader
 
 import Api
@@ -15,12 +15,11 @@ main = do
   configFile <- getConfigurationFromFile
   pool <- initConnectionPool configFile
   let fullConfig = Configuration configFile pool
-  flip runReaderT fullConfig $ do
-    startApp
+  flip runReaderT fullConfig startApp
 
 getConfigurationFromFile :: IO ConfigurationFile
 getConfigurationFromFile = do
-  eitherConfig <- ByteString.readFile "config.json" >>= return . eitherDecodeStrict'
+  eitherConfig <- BS.readFile "config.json" >>= return . eitherDecodeStrict'
   case eitherConfig of
     Right config -> return config
     Left errorMessage -> error errorMessage
