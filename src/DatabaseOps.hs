@@ -83,5 +83,5 @@ checkIfUserExists :: Text -> ConfigIO Bool
 checkIfUserExists email = do
   config@(Configuration _ conns) <- ask
   liftIO $ withResource conns $ \conn -> do
-    [Only answer] <- query conn "SELECT EXISTS(SELECT * FROM tdrc.users where email = ?" (Only email)
+    [Only answer] <- query conn "SELECT EXISTS(SELECT * FROM tdrc.users where email = ?)" (Only email)
     return answer
