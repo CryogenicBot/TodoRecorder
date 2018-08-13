@@ -1,19 +1,12 @@
--- set up simple users route that will return a list of users in the system
--- set up more endpoints related to user
-  -- set up retrieval of records
-  -- set up creating records
-{-# LANGUAGE DataKinds, TypeOperators, GeneralizedNewtypeDeriving, DeriveGeneric, OverloadedStrings #-}
+{-# LANGUAGE DataKinds, TypeOperators, DeriveGeneric, OverloadedStrings #-}
 
 module UsersRoute (
     UsersApi
   , usersServer
-  , ApiHandler(..)
 ) where
 
 import Servant
-import Control.Monad.Trans (liftIO, lift)
-import Control.Monad.Reader
-import Control.Monad.Except
+import Control.Monad.Trans (liftIO)
 import Data.Text (Text(..), pack, unpack)
 import Data.Aeson (ToJSON, FromJSON)
 import GHC.Generics
@@ -25,10 +18,7 @@ import Data.List
 import Models
 import DatabaseOps
 import Configuration
-
-newtype ApiHandler a = ApiHandler {
-    runApiHandler :: ReaderT Configuration (ExceptT ServantErr IO) a
-} deriving (Functor, Applicative, Monad, MonadReader Configuration, MonadError ServantErr, MonadIO)
+import RouteUtilities
 
 type GetUsers = "users" :> Get '[JSON] [User]
 type CreateUser = "users" :> ReqBody '[JSON] UserCreateRequest :> Post '[JSON] UserCreateResponse
@@ -40,12 +30,10 @@ usersServer :: ServerT UsersApi ApiHandler
 usersServer = getUsers :<|> createUser :<|> loginUser
 
 data UserCreateResponse = MissingField | Successful | UserAlreadyExists | Error deriving (Eq, Show, Generic)
-
 instance ToJSON UserCreateResponse
 instance FromJSON UserCreateResponse
 
 newtype UserLoginRequest = UserLoginRequest UserCreateRequest deriving (Eq, Generic)
-
 instance ToJSON UserLoginRequest
 instance FromJSON UserLoginRequest
 
@@ -75,8 +63,7 @@ checkIfUserPassIsCorrect user pass = verifyPassword (encodeUtf8 pass) (encodeUtf
 
 createUser :: UserCreateRequest -> ApiHandler UserCreateResponse
 createUser userCreateRequest = do
-  users <- runConfigIOAction dBgetUsers
-  userAlreadyExists <- return $ checkIfUserExists users (email userCreateRequest)
+  userAlreadyExists <- runConfigIOAction $ checkIfUserExists (email userCreateRequest)
   if userAlreadyExists then return UserAlreadyExists
   else do
     securePass <- liftIO . makeSecurePass $ password userCreateRequest 
@@ -85,10 +72,3 @@ createUser userCreateRequest = do
 
 makeSecurePass :: Text -> IO BS.ByteString
 makeSecurePass unsecurePass = makePasswordWith pbkdf1 (encodeUtf8 unsecurePass) 20
-
-checkIfUserExists :: [User] -> Text -> Bool
-checkIfUserExists users email = flip any users $ \user -> 
-  (userEmail user) == email
-
-runConfigIOAction :: ConfigIO a -> ApiHandler a
-runConfigIOAction action = ask >>= liftIO . runReaderT action

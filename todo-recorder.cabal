@@ -17,9 +17,11 @@ library
   hs-source-dirs:      src
   exposed-modules:     Api
                      , UsersRoute
+                     , RecordsRoute
                      , DatabaseOps
                      , Models
                      , Configuration
+                     , RouteUtilities
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , servant-server

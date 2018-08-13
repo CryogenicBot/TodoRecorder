@@ -23,6 +23,22 @@ data UserCreateRequest = UserCreateRequest {
 instance ToJSON UserCreateRequest
 instance FromJSON UserCreateRequest
 
+data RecordCreateRequest = RecordCreateRequest { 
+  currentUserId       :: Int
+, recordType  :: Text
+, apiKey              :: Text
+} deriving (Eq, Show, Generic)
+
+instance ToJSON RecordCreateRequest
+instance FromJSON RecordCreateRequest
+
+data Record = Record {
+  recordId      :: Int
+, recordApiKey  :: Text
+}
+
+type RecordType = Text
+
 newtype DatabaseName     = DatabaseName String deriving (Eq, Generic)
 newtype DatabaseUsername = DatabaseUsername String deriving (Eq, Generic)
 newtype DatabasePassword = DatabasePassword String deriving (Eq, Generic)

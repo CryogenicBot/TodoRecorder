@@ -12,10 +12,12 @@ import Control.Monad.Except
 import Control.Monad.Reader
 import Servant
 
-import UsersRoute
+import RouteUtilities
 import Configuration
+import UsersRoute
+import RecordsRoute
 
-type API = UsersApi
+type API = UsersApi :<|> RecordsApi
 
 startApp :: ConfigIO ()
 startApp = do 
@@ -32,7 +34,4 @@ server :: Configuration -> Server API
 server config = hoistServer api (convertApiHandler config) $ combinedServers
 
 combinedServers :: ServerT API ApiHandler
-combinedServers = usersServer
-
-convertApiHandler :: Configuration -> ApiHandler a -> Handler a
-convertApiHandler config = Handler . flip runReaderT config . runApiHandler
+combinedServers = usersServer :<|> recordsServer
