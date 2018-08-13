@@ -23,11 +23,12 @@ import RouteUtilities
 type GetUsers = "users" :> Get '[JSON] [User]
 type CreateUser = "users" :> ReqBody '[JSON] UserCreateRequest :> Post '[JSON] UserCreateResponse
 type LoginUser = "users" :> "login" :> ReqBody '[JSON] UserLoginRequest :> Post '[JSON] UserLoginResponse
+type GetRecordForUser = "users" :> Capture "userId" Int :> "records" :> QueryParam "type" RecordType :> Get '[JSON] Records
 
-type UsersApi = GetUsers :<|> CreateUser :<|> LoginUser
+type UsersApi = GetUsers :<|> CreateUser :<|> LoginUser :<|> GetRecordForUser
 
 usersServer :: ServerT UsersApi ApiHandler
-usersServer = getUsers :<|> createUser :<|> loginUser
+usersServer = getUsers :<|> createUser :<|> loginUser :<|> retrieveRecordsForUser
 
 data UserCreateResponse = MissingField | Successful | UserAlreadyExists | Error deriving (Eq, Show, Generic)
 instance ToJSON UserCreateResponse
@@ -41,7 +42,7 @@ data UserLoginResponse = NotAUser | IncorrectPassword | Id Int deriving (Eq, Sho
 instance ToJSON UserLoginResponse
 instance FromJSON UserLoginResponse
 
--- TODO: only meant to aid in development
+-- TODO: only meant to aid in development, remove after live
 getUsers :: ApiHandler [User]
 getUsers = runConfigIOAction dBgetUsers
 
@@ -58,6 +59,7 @@ loginUserGivenUserList users (UserLoginRequest request) =
   in case userFound of  Just userDetail -> if checkIfUserPassIsCorrect userDetail userEnteredPass then Id (userId userDetail) else IncorrectPassword
                         Nothing  -> NotAUser
 
+-- TODO: replace Text with Type alias
 checkIfUserPassIsCorrect :: User -> Text -> Bool
 checkIfUserPassIsCorrect user pass = verifyPassword (encodeUtf8 pass) (encodeUtf8 (userPassword user))
 
@@ -70,5 +72,27 @@ createUser userCreateRequest = do
     runConfigIOAction . dBcreateUser $ UserCreateRequest (email userCreateRequest) (decodeUtf8 securePass)
     return Successful
 
+-- TODO: replace Text with Type alias
 makeSecurePass :: Text -> IO BS.ByteString
 makeSecurePass unsecurePass = makePasswordWith pbkdf1 (encodeUtf8 unsecurePass) 20
+
+retrieveRecordsForUser :: Int -> Maybe RecordType -> ApiHandler Records
+retrieveRecordsForUser userId Nothing        = do
+  mRecords <- retrieveRecordsForUserByType userId "movie"
+  bRecords <- retrieveRecordsForUserByType userId "book"
+  gRecords <- retrieveRecordsForUserByType userId "game"
+  return $ Records (Just mRecords) (Just bRecords) (Just gRecords)
+retrieveRecordsForUser userId (Just "movie") = do
+  records <- retrieveRecordsForUserByType userId "movie"
+  return $ Records (Just records) Nothing Nothing
+retrieveRecordsForUser userId (Just "book")  = do
+  records <- retrieveRecordsForUserByType userId "book"
+  return $ Records Nothing (Just records) Nothing
+retrieveRecordsForUser userId (Just "game")  = do
+  records <- retrieveRecordsForUserByType userId "game"
+  return $ Records Nothing Nothing (Just records)
+
+retrieveRecordsForUserByType :: Int -> RecordType -> ApiHandler [Record]
+retrieveRecordsForUserByType userId "movie" = runConfigIOAction $ dBretrieveRecordForUser "movie" userId
+retrieveRecordsForUserByType userId "book"  = runConfigIOAction $ dBretrieveRecordForUser "book" userId
+retrieveRecordsForUserByType userId "game"  = runConfigIOAction $ dBretrieveRecordForUser "game" userId
