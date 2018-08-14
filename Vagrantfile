@@ -21,6 +21,7 @@ Vagrant.configure("2") do |config|
     end 
 
     config.vm.network "forwarded_port", guest: 1234, host: 8000
+    config.vm.network "private_network", ip: "192.168.50.20"
 
     config.vm.provision "shell", inline: $prov_script  
 

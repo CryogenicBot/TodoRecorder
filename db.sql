@@ -25,7 +25,6 @@ CREATE UNIQUE INDEX user_id_UNIQUE ON tdrc.users (user_id ASC);
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS tdrc.movie_records (
   movie_id SERIAL,
-  timestamp TIMESTAMP NULL,
   api_id text not null unique,
   PRIMARY KEY (movie_id));
 
@@ -42,7 +41,6 @@ CREATE TABLE IF NOT EXISTS tdrc.exercise_records (
   sets INT NULL,
   weight INT NULL,
   down_time INT NULL,
-  timestamp TIMESTAMP NULL,
   PRIMARY KEY (exercise_id));
 
 
@@ -54,7 +52,6 @@ CREATE UNIQUE INDEX exercise_id_UNIQUE ON tdrc.exercise_records (exercise_id ASC
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS tdrc.book_records (
   book_id SERIAL,
-  timestamp TIMESTAMP NULL,
   api_id text not null unique,
   PRIMARY KEY (book_id));
 
@@ -67,7 +64,6 @@ CREATE UNIQUE INDEX book_id_UNIQUE ON tdrc.book_records (book_id ASC);
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS tdrc.game_records (
   game_id SERIAL,
-  timestamp TIMESTAMP NULL,
   api_id text not null unique,
   PRIMARY KEY (game_id));
 
@@ -82,6 +78,7 @@ CREATE TABLE IF NOT EXISTS tdrc.user_book_records (
   user_id INT NOT NULL,
   book_id INT NOT NULL,
   user_book_id SERIAL,
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (user_book_id),
   CONSTRAINT user_id
     FOREIGN KEY (user_id)
@@ -109,6 +106,7 @@ CREATE TABLE IF NOT EXISTS tdrc.user_game_records (
   user_game_id SERIAL,
   user_id INT NOT NULL,
   game_id INT NOT NULL,
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (user_game_id),
   CONSTRAINT user_id
     FOREIGN KEY (user_id)
@@ -136,6 +134,7 @@ CREATE TABLE IF NOT EXISTS tdrc.user_exercise_records (
   user_exercise_id SERIAL,
   user_id INT NOT NULL,
   exercise_id INT NOT NULL,
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (user_exercise_id),
   CONSTRAINT user_id
     FOREIGN KEY (user_id)
@@ -163,6 +162,7 @@ CREATE TABLE IF NOT EXISTS tdrc.user_movie_records (
   user_movie_id SERIAL,
   user_id INT NOT NULL,
   movie_id INT NOT NULL,
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (user_movie_id),
   CONSTRAINT user_id
     FOREIGN KEY (user_id)
